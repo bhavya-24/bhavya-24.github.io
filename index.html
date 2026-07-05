@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Pinyon+Script&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+@keyframes helix-spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+@keyframes drift-a { 0%,100% { transform: translate(0,0); } 50% { transform: translate(6px,-14px); } }
+@keyframes drift-b { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-8px,10px); } }
+@keyframes pulse-dot { 0%,100% { opacity:.35; } 50% { opacity:1; } }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
+@keyframes logscroll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+* { box-sizing: border-box; }
+html { scroll-behavior: auto; }
+body { margin: 0; }
+::selection { background: oklch(0.86 0.08 165); }
+@media (min-width: 821px) {
+  section { padding-left: 140px !important; }
+}
+@media (max-width: 820px) {
+  #rail { display: none !important; }
+}
+</style>
+</helmet>
+
+<div style="position:relative; font-family:'IBM Plex Sans',sans-serif; color:oklch(0.24 0.02 165); background:linear-gradient(180deg, oklch(0.995 0.004 160) 0%, oklch(0.98 0.012 165) 100%); overflow-x:hidden;">
+
+  <!-- Big centered DNA spine — grows & unwinds with scroll -->
+  <div style="position:fixed; inset:0; z-index:0; pointer-events:none; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+    <div style="perspective:3200px; width:1900px; height:126vh; position:relative;">
+      <div ref="{{ registerHelixOuter }}" style="width:100%; height:100%; position:relative; transform-style:preserve-3d;">
+        <div style="width:100%; height:100%; position:relative; transform-style:preserve-3d; animation:helix-spin 44s linear infinite;">
+          <sc-for list="{{ helixRungs }}" as="r" hint-placeholder-count="46">
+            <div style="position:absolute; top:50%; left:50%; width:0; height:0; transform: translate(-50%,-50%) translateY({{ r.y }}px) rotateY({{ r.angle }}deg);">
+              <div style="position:absolute; left:-360px; top:-40px; transform:translateZ(360px); width:80px; height:80px; border-radius:24px; background:{{ r.leftColor }}; color:white; font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:33px; display:flex; align-items:center; justify-content:center; opacity:{{ r.op }};">{{ r.leftLetter }}</div>
+              <div style="position:absolute; left:-278px; top:-2px; width:556px; height:3px; background:oklch(0.8 0.03 170 / 0.32); border-radius:2px; transform:translateZ(360px);"></div>
+              <div style="position:absolute; left:280px; top:-40px; transform:translateZ(360px); width:80px; height:80px; border-radius:24px; background:{{ r.rightColor }}; color:white; font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:33px; display:flex; align-items:center; justify-content:center; opacity:{{ r.op }};">{{ r.rightLetter }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Biological backdrop — cattle, sheep & humans drifting behind the DNA -->
+  <div ref="{{ registerFloatLayer }}" style="position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;">
+    <sc-for list="{{ floaters }}" as="f" hint-placeholder-count="16">
+      <div style="position:absolute; left:{{ f.left }}%; top:{{ f.top }}%; width:{{ f.size }}px; opacity:{{ f.opacity }}; animation:{{ f.anim }} {{ f.dur }}s ease-in-out infinite; animation-delay:{{ f.delay }}s;">
+        <sc-if value="{{ f.isCow }}">
+          <svg viewBox="0 0 128 92" style="width:100%; height:auto; display:block;" fill="{{ f.color }}">
+            <path d="M10 34 L6 22 L14 30 Z"></path>
+            <path d="M30 34 L34 22 L26 30 Z"></path>
+            <rect x="6" y="30" width="26" height="20" rx="6"></rect>
+            <rect x="26" y="26" width="80" height="30" rx="13"></rect>
+            <rect x="34" y="54" width="8" height="28" rx="3"></rect>
+            <rect x="50" y="54" width="8" height="28" rx="3"></rect>
+            <rect x="76" y="54" width="8" height="28" rx="3"></rect>
+            <rect x="92" y="54" width="8" height="28" rx="3"></rect>
+            <ellipse cx="66" cy="58" rx="9" ry="5"></ellipse>
+            <rect x="104" y="30" width="5" height="30" rx="2.5"></rect>
+            <circle cx="106" cy="62" r="5"></circle>
+          </svg>
+        </sc-if>
+        <sc-if value="{{ f.isSheep }}">
+          <svg viewBox="0 0 128 92" style="width:100%; height:auto; display:block;" fill="{{ f.color }}">
+            <ellipse cx="70" cy="44" rx="38" ry="22"></ellipse>
+            <circle cx="46" cy="34" r="18"></circle>
+            <circle cx="66" cy="28" r="20"></circle>
+            <circle cx="88" cy="34" r="18"></circle>
+            <circle cx="96" cy="48" r="13"></circle>
+            <circle cx="42" cy="50" r="13"></circle>
+            <ellipse cx="28" cy="46" rx="12" ry="9"></ellipse>
+            <path d="M18 40 Q12 36 16 46 Z"></path>
+            <rect x="46" y="60" width="6" height="24" rx="3"></rect>
+            <rect x="60" y="62" width="6" height="24" rx="3"></rect>
+            <rect x="80" y="62" width="6" height="24" rx="3"></rect>
+            <rect x="92" y="60" width="6" height="24" rx="3"></rect>
+          </svg>
+        </sc-if>
+        <sc-if value="{{ f.isHuman }}">
+          <svg viewBox="0 0 56 104" style="width:100%; height:auto; display:block;" fill="{{ f.color }}">
+            <circle cx="28" cy="15" r="11"></circle>
+            <rect x="20" y="30" width="16" height="30" rx="7"></rect>
+            <rect x="12" y="32" width="7" height="26" rx="3.5"></rect>
+            <rect x="37" y="32" width="7" height="26" rx="3.5"></rect>
+            <rect x="21" y="58" width="7" height="38" rx="3.5"></rect>
+            <rect x="28" y="58" width="7" height="38" rx="3.5"></rect>
+          </svg>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- Fixed progress rail — orientation: where you are & what's next -->
+  <div id="rail" style="position:fixed; left:26px; top:50%; transform:translateY(-50%); z-index:60; display:flex; flex-direction:column; gap:15px;">
+    <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="7">
+      <div data-rail="{{ n.id }}" onClick="{{ () => scrollToSection(n.id) }}" style="display:flex; align-items:center; gap:11px; cursor:pointer; opacity:0.4; transition:opacity 0.35s;">
+        <span data-dot style="width:9px; height:9px; border-radius:50%; background:oklch(0.8 0.03 160); transition:all 0.35s;"></span>
+        <span data-label style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:oklch(0.6 0.02 165); transition:color 0.35s;">{{ n.label }}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- ============ HERO ============ -->
+  <section id="home" data-section="home" style="position:relative; z-index:1; min-height:100vh; padding:80px max(24px,7vw) 60px; display:flex; align-items:center; justify-content:flex-start;">
+    <div style="perspective:1500px;">
+      <div data-anim="head" style="width:min(620px,64vw); background:oklch(0.995 0.006 160 / 0.95); backdrop-filter:blur(18px); border:1px solid oklch(0.93 0.02 160 / 0.7); border-radius:30px; padding:52px 50px; box-shadow:0 30px 70px rgba(20,60,45,0.12);">
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color:oklch(0.5 0.13 160); margin-bottom:16px;">Assembly · RNA-seq · Evolution · Algorithms · Databases</div>
+        <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:999px; background:oklch(0.95 0.03 160); color:oklch(0.42 0.14 160); font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; margin-bottom:22px;">
+          <span style="width:7px; height:7px; border-radius:50%; background:oklch(0.55 0.15 160); animation:pulse-dot 2s ease-in-out infinite;"></span>
+          MSc Bioinformatics · Edinburgh · graduating Aug 2026
+        </div>
+        <h1 style="font-family:'Cormorant Garamond',serif; font-size:74px; line-height:0.98; letter-spacing:-0.01em; margin:0 0 24px; font-weight:600;">Bhavya Kaushal</h1>
+        <p style="font-size:18.5px; line-height:1.6; color:oklch(0.38 0.02 165); margin:0 0 30px; max-width:540px;">I work right across the bioinformatics pipeline, from building genomes and reading RNA-seq to tracing evolutionary history and writing the software and databases that make an analysis hold up.</p>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+          <a href="https://github.com/bhavya-24" target="_blank" rel="noopener" style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:oklch(0.45 0.05 165); text-decoration:none;" style-hover="color:oklch(0.53 0.15 160)">GitHub ↗</a>
+          <a href="https://linkedin.com/in/bhavyakaushal" target="_blank" rel="noopener" style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:oklch(0.45 0.05 165); text-decoration:none;" style-hover="color:oklch(0.53 0.15 160)">LinkedIn ↗</a>
+        </div>
+      </div>
+    </div>
+    <div style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase; color:oklch(0.55 0.06 165); animation:bob 2.4s ease-in-out infinite;">scroll to unwind ↓</div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="about" data-section="about" style="position:relative; z-index:1; padding:60px max(24px,7vw);">
+    <div data-anim="head" style="text-align:center; max-width:660px; margin:0 auto 44px; padding:24px 34px; border-radius:22px; background:oklch(0.995 0.006 160 / 0.92); backdrop-filter:blur(12px); border:1px solid oklch(0.93 0.02 160 / 0.6);">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:oklch(0.5 0.13 160); letter-spacing:0.16em; text-transform:uppercase; margin-bottom:14px;">01 / About</div>
+      <h2 style="font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:600; margin:0; letter-spacing:-0.01em;">From messy reads to a biological answer</h2>
+    </div>
+    <div style="display:flex; justify-content:flex-end;">
+      <div style="perspective:1600px;">
+        <div data-anim="card" data-dir="right" style="width:min(640px,60vw); background:oklch(0.99 0.006 160 / 0.9); backdrop-filter:blur(16px); border:1px solid oklch(0.93 0.02 160); border-radius:26px; padding:44px; box-shadow:0 26px 64px rgba(20,60,45,0.1);">
+          <p style="font-size:16px; line-height:1.78; color:oklch(0.34 0.02 165); margin:0 0 18px;">I'm a bioinformatician finishing my MSc at Edinburgh, and I like the problems that start with messy data and end with an actual biological answer. My work spans the whole pipeline, from assembling genomes and quantifying gene expression to tracing evolutionary history and writing the software and databases that hold an analysis together.</p>
+          <p style="font-size:16px; line-height:1.78; color:oklch(0.34 0.02 165); margin:0 0 18px;">What I enjoy most is the variety. Across my projects I've put genomes together from raw reads, dug through RNA-seq for the pathways that shift in a mutant, tested where an animal really sits on the tree of life, hardened an alignment toolkit until it stopped falling over, and pulled three databases into a single answer. What ties it together is curiosity about the biology and a bit of stubbornness about getting the method right.</p>
+          <p style="font-size:16px; line-height:1.78; color:oklch(0.34 0.02 165); margin:0 0 24px;">Day to day I work in Python, R and Bash, mostly on HPC clusters, and I'm fussy about pipelines someone else can actually re-run without me in the room.</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <sc-for list="{{ quickFacts }}" as="qf" hint-placeholder-count="4">
+              <div style="background:oklch(0.96 0.02 160); border-radius:12px; padding:14px 16px;">
+                <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:oklch(0.5 0.08 165); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:5px;">{{ qf.label }}</div>
+                <div style="font-size:13.5px; font-weight:600; line-height:1.35;">{{ qf.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SKILLS ============ -->
+  <section id="skills" data-section="skills" style="position:relative; z-index:1; padding:60px max(24px,7vw);">
+    <div data-anim="head" style="text-align:center; max-width:660px; margin:0 auto 44px; padding:24px 34px; border-radius:22px; background:oklch(0.995 0.006 160 / 0.92); backdrop-filter:blur(12px); border:1px solid oklch(0.93 0.02 160 / 0.6);">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:oklch(0.5 0.13 160); letter-spacing:0.16em; text-transform:uppercase; margin-bottom:14px;">02 / Skills</div>
+      <h2 style="font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:600; margin:0; letter-spacing:-0.01em;">What I build with</h2>
+    </div>
+    <div style="display:flex; justify-content:flex-start;">
+      <div style="perspective:1600px;">
+        <div data-anim="card" data-dir="left" style="width:min(680px,62vw); background:oklch(0.99 0.006 160 / 0.9); backdrop-filter:blur(16px); border:1px solid oklch(0.93 0.02 160); border-radius:26px; padding:44px; box-shadow:0 26px 64px rgba(20,60,45,0.1);">
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <sc-for list="{{ skillGroups }}" as="g" hint-placeholder-count="7">
+              <div>
+                <div style="font-weight:700; font-size:14.5px; margin-bottom:10px;">{{ g.name }}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:7px;">
+                  <sc-for list="{{ g.tools }}" as="t" hint-placeholder-count="5">
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; padding:5px 10px; border-radius:7px; background:oklch(0.95 0.03 160); color:oklch(0.4 0.1 165);">{{ t }}</span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROJECTS ============ -->
+  <section id="projects" data-section="projects" style="position:relative; z-index:1; padding:60px max(24px,7vw) 20px;">
+    <div data-anim="head" style="text-align:center; max-width:680px; margin:0 auto 44px; padding:24px 34px; border-radius:22px; background:oklch(0.995 0.006 160 / 0.92); backdrop-filter:blur(12px); border:1px solid oklch(0.93 0.02 160 / 0.6);">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:oklch(0.5 0.13 160); letter-spacing:0.16em; text-transform:uppercase; margin-bottom:14px;">03 / Selected Work</div>
+      <h2 style="font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Genomes, unwound</h2>
+      <p style="font-size:14.5px; color:oklch(0.45 0.02 165); margin:0;">Each project as a short story: what I set out to do, and what I actually found.</p>
+    </div>
+
+    <!-- Featured dissertation -->
+    <div style="display:flex; justify-content:flex-start; margin-bottom:8px;">
+      <div style="perspective:1700px;">
+        <div data-anim="card" data-dir="left" style="width:min(720px,64vw); background:oklch(0.99 0.006 160 / 0.93); backdrop-filter:blur(16px); border:1px solid oklch(0.93 0.02 160); border-radius:28px; overflow:hidden; box-shadow:0 30px 72px rgba(20,60,45,0.14);">
+          <div style="height:180px; background:linear-gradient(160deg, oklch(0.95 0.03 160), oklch(0.87 0.05 178)); display:flex; align-items:center; justify-content:center; position:relative;">
+            <svg viewBox="0 0 260 160" style="width:58%;">
+              <line x1="40" y1="120" x2="90" y2="50" stroke="oklch(0.5 0.12 165)" stroke-width="2"></line>
+              <line x1="90" y1="50" x2="150" y2="80" stroke="oklch(0.5 0.12 165)" stroke-width="2"></line>
+              <line x1="90" y1="50" x2="60" y2="18" stroke="oklch(0.5 0.12 165)" stroke-width="2"></line>
+              <line x1="150" y1="80" x2="210" y2="34" stroke="oklch(0.5 0.12 165)" stroke-width="2"></line>
+              <line x1="150" y1="80" x2="200" y2="120" stroke="oklch(0.5 0.12 165)" stroke-width="2"></line>
+              <line x1="40" y1="120" x2="100" y2="145" stroke="oklch(0.5 0.12 165)" stroke-width="2"></line>
+              <circle cx="40" cy="120" r="8" fill="oklch(0.5 0.14 160)"></circle>
+              <circle cx="90" cy="50" r="8" fill="oklch(0.54 0.14 175)"></circle>
+              <circle cx="60" cy="18" r="6" fill="oklch(0.6 0.12 165)"></circle>
+              <circle cx="150" cy="80" r="8" fill="oklch(0.5 0.14 160)"></circle>
+              <circle cx="210" cy="34" r="6" fill="oklch(0.6 0.12 178)"></circle>
+              <circle cx="200" cy="120" r="7" fill="oklch(0.54 0.14 165)"></circle>
+              <circle cx="100" cy="145" r="6" fill="oklch(0.6 0.12 160)"></circle>
+            </svg>
+            <div style="position:absolute; bottom:14px; left:0; right:0; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px; color:oklch(0.42 0.05 165);">pangenome graph · schematic</div>
+          </div>
+          <div style="padding:38px 42px;">
+            <div style="display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:700; color:oklch(0.48 0.15 160); background:oklch(0.95 0.04 160); padding:5px 12px; border-radius:999px; margin-bottom:14px;">⭐ MSc DISSERTATION</div>
+            <h3 style="font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:600; margin:0 0 14px; line-height:1.2;">Genome analysis of an infertility variant in a cattle breed</h3>
+            <p style="font-size:15px; line-height:1.7; color:oklch(0.4 0.02 165); margin:0 0 18px;">Working on a highly penetrant infertility variant in a cattle breed. Using Oxford Nanopore (ONT) and Illumina reads, I first built a high-quality genome, polished it into a clean assembly, and then ran the downstream analysis from there. Details kept brief, as this is ongoing work under non-disclosure.</p>
+            <div style="display:flex; flex-wrap:wrap; gap:7px;">
+              <sc-for list="{{ featuredProject.stack }}" as="s" hint-placeholder-count="5">
+                <span style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:5px 10px; border-radius:7px; background:oklch(0.95 0.03 160); color:oklch(0.4 0.1 165);">{{ s }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other projects, alternating out of the DNA -->
+    <sc-for list="{{ otherProjects }}" as="p" hint-placeholder-count="6">
+      <div style="display:flex; justify-content:{{ p.justify }}; margin-top:34px;">
+        <div style="perspective:1700px;">
+          <div data-anim="card" data-dir="{{ p.side }}" style="width:min(600px,58vw); background:oklch(0.99 0.006 160 / 0.93); backdrop-filter:blur(16px); border:1px solid oklch(0.93 0.02 160); border-radius:24px; overflow:hidden; box-shadow:0 22px 56px rgba(20,60,45,0.1);">
+            <div style="height:150px; background:linear-gradient(160deg, oklch(0.97 0.02 160), oklch(0.9 0.045 174)); display:flex; align-items:center; justify-content:center; position:relative;">
+              <sc-if value="{{ p.thumb === 'bars' }}">
+                <svg viewBox="0 0 220 100" style="width:72%;">
+                  <rect x="10" y="40" width="16" height="50" fill="oklch(0.6 0.12 165)"></rect>
+                  <rect x="34" y="20" width="16" height="70" fill="oklch(0.54 0.14 160)"></rect>
+                  <rect x="58" y="55" width="16" height="35" fill="oklch(0.65 0.1 172)"></rect>
+                  <rect x="82" y="10" width="16" height="80" fill="oklch(0.5 0.15 158)"></rect>
+                  <rect x="106" y="45" width="16" height="45" fill="oklch(0.6 0.12 165)"></rect>
+                  <rect x="130" y="28" width="16" height="62" fill="oklch(0.54 0.14 160)"></rect>
+                  <rect x="154" y="60" width="16" height="30" fill="oklch(0.65 0.1 172)"></rect>
+                  <rect x="178" y="15" width="16" height="75" fill="oklch(0.5 0.15 158)"></rect>
+                </svg>
+              </sc-if>
+              <sc-if value="{{ p.thumb === 'tree' }}">
+                <svg viewBox="0 0 220 100" style="width:72%;">
+                  <line x1="10" y1="50" x2="60" y2="50" stroke="oklch(0.54 0.13 165)" stroke-width="2"></line>
+                  <line x1="60" y1="50" x2="100" y2="20" stroke="oklch(0.54 0.13 165)" stroke-width="2"></line>
+                  <line x1="60" y1="50" x2="100" y2="80" stroke="oklch(0.54 0.13 165)" stroke-width="2"></line>
+                  <line x1="100" y1="20" x2="150" y2="10" stroke="oklch(0.54 0.13 165)" stroke-width="2"></line>
+                  <line x1="100" y1="20" x2="150" y2="30" stroke="oklch(0.54 0.13 165)" stroke-width="2"></line>
+                  <line x1="100" y1="80" x2="150" y2="70" stroke="oklch(0.54 0.13 165)" stroke-width="2"></line>
+                  <line x1="100" y1="80" x2="150" y2="92" stroke="oklch(0.54 0.13 165)" stroke-width="2"></line>
+                  <circle cx="150" cy="10" r="4" fill="oklch(0.5 0.14 160)"></circle>
+                  <circle cx="150" cy="30" r="4" fill="oklch(0.5 0.14 160)"></circle>
+                  <circle cx="150" cy="70" r="4" fill="oklch(0.5 0.14 160)"></circle>
+                  <circle cx="150" cy="92" r="4" fill="oklch(0.5 0.14 160)"></circle>
+                </svg>
+              </sc-if>
+              <sc-if value="{{ p.thumb === 'trace' }}">
+                <svg viewBox="0 0 220 100" style="width:72%;">
+                  <polyline points="0,60 15,40 30,70 45,20 60,55 75,30 90,65 105,15 120,50 135,35 150,72 165,25 180,58 195,42 210,60" fill="none" stroke="oklch(0.54 0.14 160)" stroke-width="2.5"></polyline>
+                </svg>
+              </sc-if>
+              <sc-if value="{{ p.thumb === 'grid' }}">
+                <svg viewBox="0 0 220 100" style="width:66%;">
+                  <sc-for list="{{ p.gridCells }}" as="c" hint-placeholder-count="24">
+                    <rect x="{{ c.x }}" y="{{ c.y }}" width="24" height="18" fill="{{ c.color }}"></rect>
+                  </sc-for>
+                </svg>
+              </sc-if>
+              <sc-if value="{{ p.thumb === 'nodegraph' }}">
+                <svg viewBox="0 0 220 100" style="width:72%;">
+                  <line x1="30" y1="30" x2="90" y2="20" stroke="oklch(0.6 0.12 165)" stroke-width="2"></line>
+                  <line x1="90" y1="20" x2="150" y2="50" stroke="oklch(0.6 0.12 165)" stroke-width="2"></line>
+                  <line x1="30" y1="30" x2="60" y2="80" stroke="oklch(0.6 0.12 165)" stroke-width="2"></line>
+                  <line x1="60" y1="80" x2="150" y2="50" stroke="oklch(0.6 0.12 165)" stroke-width="2"></line>
+                  <line x1="150" y1="50" x2="200" y2="20" stroke="oklch(0.6 0.12 165)" stroke-width="2"></line>
+                  <line x1="150" y1="50" x2="200" y2="80" stroke="oklch(0.6 0.12 165)" stroke-width="2"></line>
+                  <circle cx="30" cy="30" r="7" fill="oklch(0.54 0.14 160)"></circle>
+                  <circle cx="90" cy="20" r="6" fill="oklch(0.6 0.12 172)"></circle>
+                  <circle cx="60" cy="80" r="6" fill="oklch(0.6 0.12 172)"></circle>
+                  <circle cx="150" cy="50" r="7" fill="oklch(0.54 0.14 160)"></circle>
+                  <circle cx="200" cy="20" r="5" fill="oklch(0.65 0.1 168)"></circle>
+                  <circle cx="200" cy="80" r="5" fill="oklch(0.65 0.1 168)"></circle>
+                </svg>
+              </sc-if>
+              <sc-if value="{{ p.thumb === 'fil' }}">
+                <svg viewBox="0 0 220 100" style="width:72%;">
+                  <path d="M20,70 Q50,20 80,60" fill="none" stroke="oklch(0.54 0.14 160)" stroke-width="3" stroke-linecap="round"></path>
+                  <path d="M70,80 Q110,30 150,70" fill="none" stroke="oklch(0.58 0.12 172)" stroke-width="3" stroke-linecap="round"></path>
+                  <path d="M130,60 Q170,15 205,55" fill="none" stroke="oklch(0.5 0.15 158)" stroke-width="3" stroke-linecap="round"></path>
+                  <circle cx="20" cy="70" r="4" fill="oklch(0.5 0.14 160)"></circle>
+                  <circle cx="80" cy="60" r="4" fill="oklch(0.5 0.14 160)"></circle>
+                  <circle cx="150" cy="70" r="4" fill="oklch(0.5 0.14 160)"></circle>
+                  <circle cx="205" cy="55" r="4" fill="oklch(0.5 0.14 160)"></circle>
+                </svg>
+              </sc-if>
+            </div>
+            <div style="padding:28px 32px; display:flex; flex-direction:column; gap:11px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div style="font-family:'Cormorant Garamond',serif; font-weight:600; font-size:22px; line-height:1.25;">{{ p.title }}</div>
+                <sc-if value="{{ p.award }}"><span style="font-size:15px;">🏆</span></sc-if>
+              </div>
+              <div style="font-size:13.5px; line-height:1.65; color:oklch(0.4 0.02 165);">{{ p.summary }}</div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">
+                <sc-for list="{{ p.stack }}" as="s" hint-placeholder-count="4">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:6px; background:oklch(0.95 0.03 160); color:oklch(0.4 0.1 165);">{{ s }}</span>
+                </sc-for>
+              </div>
+              <a href="{{ p.repo }}" target="_blank" rel="noopener" style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:oklch(0.5 0.13 160); text-decoration:none; margin-top:8px;" style-hover="color:oklch(0.4 0.13 160)">View code ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </section>
+
+  <!-- ============ PUBLICATIONS ============ -->
+  <section id="publications" data-section="publications" style="position:relative; z-index:1; padding:70px max(24px,7vw);">
+    <div data-anim="head" style="text-align:center; max-width:660px; margin:0 auto 44px; padding:24px 34px; border-radius:22px; background:oklch(0.995 0.006 160 / 0.92); backdrop-filter:blur(12px); border:1px solid oklch(0.93 0.02 160 / 0.6);">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:oklch(0.5 0.13 160); letter-spacing:0.16em; text-transform:uppercase; margin-bottom:14px;">04 / Publications</div>
+      <h2 style="font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:600; margin:0; letter-spacing:-0.01em;">Published &amp; presented</h2>
+    </div>
+    <div style="display:flex; justify-content:flex-end;">
+      <div style="perspective:1600px;">
+        <div data-anim="card" data-dir="right" style="width:min(680px,62vw); background:oklch(0.99 0.006 160 / 0.9); backdrop-filter:blur(16px); border:1px solid oklch(0.93 0.02 160); border-radius:26px; padding:34px 40px; box-shadow:0 26px 64px rgba(20,60,45,0.1);">
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <sc-for list="{{ publications }}" as="pub" hint-placeholder-count="4">
+              <sc-if value="{{ pub.link }}">
+                <a href="{{ pub.href }}" target="_blank" rel="noopener" style="display:flex; gap:16px; align-items:flex-start; padding:16px 0; border-bottom:1px solid oklch(0.93 0.015 160); text-decoration:none; color:inherit;">
+                  <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:white; background:oklch(0.55 0.15 160); padding:5px 9px; border-radius:6px; white-space:nowrap; margin-top:2px;">{{ pub.type }}</div>
+                  <div>
+                    <div style="font-weight:600; font-size:14.5px; margin-bottom:3px; line-height:1.4;">{{ pub.title }}<span style="color:oklch(0.5 0.13 160); font-family:'IBM Plex Mono',monospace;">{{ pub.arrow }}</span></div>
+                    <div style="font-size:13px; color:oklch(0.45 0.02 165);">{{ pub.venue }}</div>
+                  </div>
+                </a>
+              </sc-if>
+              <sc-if value="{{ pub.plain }}">
+                <div style="display:flex; gap:16px; align-items:flex-start; padding:16px 0; border-bottom:1px solid oklch(0.93 0.015 160);">
+                  <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:white; background:oklch(0.6 0.06 165); padding:5px 9px; border-radius:6px; white-space:nowrap; margin-top:2px;">{{ pub.type }}</div>
+                  <div>
+                    <div style="font-weight:600; font-size:14.5px; margin-bottom:3px; line-height:1.4;">{{ pub.title }}</div>
+                    <div style="font-size:13px; color:oklch(0.45 0.02 165);">{{ pub.venue }}</div>
+                  </div>
+                </div>
+              </sc-if>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXPERIENCE & EDUCATION ============ -->
+  <section id="experience" data-section="experience" style="position:relative; z-index:1; padding:70px max(24px,7vw);">
+    <div data-anim="head" style="text-align:center; max-width:680px; margin:0 auto 44px; padding:24px 34px; border-radius:22px; background:oklch(0.995 0.006 160 / 0.92); backdrop-filter:blur(12px); border:1px solid oklch(0.93 0.02 160 / 0.6);">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:oklch(0.5 0.13 160); letter-spacing:0.16em; text-transform:uppercase; margin-bottom:14px;">05 / Experience &amp; Education</div>
+      <h2 style="font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:600; margin:0; letter-spacing:-0.01em;">Experience &amp; education</h2>
+    </div>
+    <div style="display:flex; justify-content:flex-start;">
+      <div style="perspective:1700px;">
+        <div data-anim="card" data-dir="left" style="width:min(760px,66vw); background:oklch(0.99 0.006 160 / 0.9); backdrop-filter:blur(16px); border:1px solid oklch(0.93 0.02 160); border-radius:26px; padding:44px; box-shadow:0 26px 64px rgba(20,60,45,0.1);">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:44px;">
+            <div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:oklch(0.5 0.14 160); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:20px;">Experience</div>
+              <div style="display:flex; flex-direction:column; gap:22px;">
+                <sc-for list="{{ experience }}" as="e" hint-placeholder-count="3">
+                  <div style="position:relative; padding-left:22px; border-left:2px solid oklch(0.9 0.02 160);">
+                    <div style="position:absolute; left:-6px; top:2px; width:10px; height:10px; border-radius:50%; background:oklch(0.55 0.15 160);"></div>
+                    <div style="font-weight:600; font-size:14.5px;">{{ e.role }}</div>
+                    <div style="font-size:12px; color:oklch(0.5 0.1 165); font-family:'IBM Plex Mono',monospace; margin:3px 0 7px;">{{ e.dates }}</div>
+                    <div style="font-size:13px; line-height:1.6; color:oklch(0.42 0.02 165);">{{ e.desc }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:oklch(0.5 0.14 160); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:20px;">Education</div>
+              <div style="display:flex; flex-direction:column; gap:22px;">
+                <sc-for list="{{ education }}" as="ed" hint-placeholder-count="2">
+                  <div style="position:relative; padding-left:22px; border-left:2px solid oklch(0.9 0.02 160);">
+                    <div style="position:absolute; left:-6px; top:2px; width:10px; height:10px; border-radius:50%; background:oklch(0.55 0.15 160);"></div>
+                    <div style="font-weight:600; font-size:14.5px;">{{ ed.role }}</div>
+                    <div style="font-size:12px; color:oklch(0.5 0.1 165); font-family:'IBM Plex Mono',monospace; margin:3px 0 7px;">{{ ed.dates }}</div>
+                    <div style="font-size:13px; line-height:1.6; color:oklch(0.42 0.02 165);">{{ ed.desc }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:oklch(0.5 0.14 160); text-transform:uppercase; letter-spacing:0.08em; margin:26px 0 12px;">Leadership &amp; outreach</div>
+              <div style="font-size:13px; line-height:1.65; color:oklch(0.42 0.02 165);">Design Lead, Google Developer Student Club (led team of 5; 600-student Google Crowdsource campaign) · Organising Committee, Kotlin Conference 2023 · Drafting Team Lead, TechBiome.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section id="contact" data-section="contact" style="position:relative; z-index:1; padding:70px max(24px,7vw) 90px;">
+    <div style="display:flex; justify-content:center;">
+      <div style="perspective:1600px;">
+        <div data-anim="card" data-dir="center" style="width:min(760px,84vw); text-align:center; background:oklch(0.99 0.006 160 / 0.92); backdrop-filter:blur(16px); border:1px solid oklch(0.93 0.02 160); border-radius:30px; padding:56px 48px; box-shadow:0 30px 72px rgba(20,60,45,0.14);">
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; color:oklch(0.5 0.13 160); letter-spacing:0.16em; text-transform:uppercase; margin-bottom:16px;">06 / Get in touch</div>
+          <h2 style="font-family:'Cormorant Garamond',serif; font-size:34px; font-weight:600; margin:0 0 14px; letter-spacing:-0.01em; line-height:1.25;">Graduating in 2026 and open to any bioinformatics role that's available.</h2>
+          <p style="font-size:15.5px; color:oklch(0.42 0.02 165); margin:0 0 30px;">Based in the UK · happy to work anywhere in the world.</p>
+          <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-bottom:36px;">
+            <a href="mailto:bhavyakaushal24@gmail.com" style="padding:14px 28px; border-radius:12px; background:oklch(0.53 0.15 160); color:white; font-weight:600; font-size:15px; text-decoration:none; box-shadow:0 10px 24px oklch(0.53 0.15 160 / 0.3);">Email me</a>
+            <a href="https://github.com/bhavya-24" target="_blank" rel="noopener" style="padding:14px 28px; border-radius:12px; border:1.5px solid oklch(0.87 0.03 160); color:oklch(0.26 0.02 165); font-weight:600; font-size:15px; text-decoration:none;">GitHub</a>
+            <a href="https://linkedin.com/in/bhavyakaushal" target="_blank" rel="noopener" style="padding:14px 28px; border-radius:12px; border:1.5px solid oklch(0.87 0.03 160); color:oklch(0.26 0.02 165); font-weight:600; font-size:15px; text-decoration:none;">LinkedIn</a>
+          </div>
+          <div style="border-top:1px solid oklch(0.9 0.02 160); padding-top:24px; font-family:'Pinyon Script',cursive; font-size:34px; line-height:1; color:oklch(0.46 0.12 160);">Bhavya Kaushal</div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:oklch(0.6 0.02 165); margin-top:6px;">© 2026 · bhavyakaushal24@gmail.com</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tail room so the final card can fly fully out of the DNA -->
+  <div style="position:relative; z-index:1; height:28vh;"></div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:820},&quot;dnaPalette&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Teal&quot;,&quot;Ocean&quot;,&quot;Aurora&quot;,&quot;Mono&quot;],&quot;default&quot;:&quot;Teal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;DNA backdrop&quot;,&quot;label&quot;:&quot;Palette&quot;},&quot;dnaPresence&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Whisper&quot;,&quot;Balanced&quot;,&quot;Bold&quot;],&quot;default&quot;:&quot;Bold&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;DNA backdrop&quot;,&quot;label&quot;:&quot;Presence&quot;},&quot;flightIntensity&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Subtle&quot;,&quot;Balanced&quot;,&quot;Cinematic&quot;],&quot;default&quot;:&quot;Cinematic&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Motion&quot;,&quot;label&quot;:&quot;Flight intensity&quot;}}">
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.helixOuter = null;
+    this.floatLayer = null;
+    this.running = false;
+    this.smooth = 0.16;      // lerp factor for buttery motion
+    this.helixState = { rot: 0, tilt: 0, scale: 1, ty: 0 };
+    this.typeEl = null;
+    this.tw = { cmd: 0, len: 0, mode: 'type', last: 0, holdUntil: 0 };
+    this.commands = [
+      'hifiasm -o asm.hifi -t 32 reads.fq.gz',
+      'minimap2 -ax map-ont ref.fa reads.fq | samtools sort -o aln.bam',
+      'busco -i asm.fa -l mammalia_odb10 -m genome',
+      'iqtree2 -s aln.fa -m MFP -bb 1000',
+      'Rscript deseq2.R --contrast mutant:wt',
+      'samtools flagstat aln.bam',
+    ];
+  }
+
+  componentDidMount() { this.ensureLoop(); }
+
+  ensureLoop() {
+    if (this.running) return;
+    this.running = true;
+    this.boundLoop = this.loop.bind(this);
+    this.rafId = requestAnimationFrame(this.boundLoop);
+    if (!this.scrollBound) {
+      this.scrollBound = () => this.frame();
+      window.addEventListener('scroll', this.scrollBound, { passive: true, capture: true });
+      window.addEventListener('resize', this.scrollBound, { passive: true });
+    }
+  }
+
+  componentWillUnmount() {
+    this.running = false;
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+    if (this.scrollBound) {
+      window.removeEventListener('scroll', this.scrollBound, { capture: true });
+      window.removeEventListener('resize', this.scrollBound);
+      this.scrollBound = null;
+    }
+  }
+
+  getScroll() {
+    const h = document.getElementById('home');
+    if (h) return Math.max(0, -h.getBoundingClientRect().top);
+    const se = document.scrollingElement || document.documentElement;
+    return window.scrollY || (se && se.scrollTop) || 0;
+  }
+
+  loop() {
+    if (!this.running) return;
+    this.frame();
+    this.rafId = requestAnimationFrame(this.boundLoop);
+  }
+
+  frame() {
+    try {
+      const y = this.getScroll();
+      // Smoothly ease the helix toward its scroll-target for buttery motion
+      if (this.helixOuter) {
+        const hs = this.helixState;
+        const k = this.smooth;
+        hs.rot += (y * 0.15 - hs.rot) * k;
+        hs.tilt += (Math.sin(y * 0.0011) * 10 - hs.tilt) * k;
+        const presMul = this.props.dnaPresence === 'Whisper' ? 0.78 : this.props.dnaPresence === 'Bold' ? 1.28 : 1;
+        hs.scale += ((presMul * (1 + Math.min(y / 2000, 0.6))) - hs.scale) * k;
+        hs.ty += (-y * 0.03 - hs.ty) * k;
+        this.helixOuter.style.transform =
+          `translateY(${hs.ty.toFixed(2)}px) rotateY(${hs.rot.toFixed(2)}deg) rotateX(${hs.tilt.toFixed(2)}deg) scale(${hs.scale.toFixed(4)})`;
+      }
+      if (this.floatLayer) this.floatLayer.style.transform = `translateY(${(y * -0.04).toFixed(1)}px)`;
+      this.typeTick();
+      this.updateReveals(y);
+      this.updateRail();
+    } catch (e) { /* keep going */ }
+  }
+
+  updateReveals(y) {
+    const els = document.querySelectorAll('[data-anim]');
+    const vh = window.innerHeight;
+    const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+    const easeIO = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const k = this.smooth;
+    els.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      const start = vh * 0.94;
+      const end = vh * 0.44;
+      let tp = (start - rect.top) / (start - end);
+      tp = Math.max(0, Math.min(1, tp));
+      if (el.__p == null) el.__p = tp;          // no first-paint jump
+      el.__p += (tp - el.__p) * k;              // lerp → smooth
+      const p = el.__p;
+      const type = el.getAttribute('data-anim');
+      if (type === 'head') {
+        const e = easeOut(p), inv = 1 - e;
+        el.style.opacity = Math.min(1, p * 1.7).toFixed(3);
+        el.style.transform = `perspective(1000px) translateY(${(inv * 58).toFixed(1)}px) rotateX(${(inv * 15).toFixed(1)}deg) scale(${(0.965 + 0.035 * e).toFixed(3)})`;
+      } else {
+        const dir = el.getAttribute('data-dir');
+        const s = dir === 'left' ? 1 : (dir === 'right' ? -1 : 0);
+        const e = easeIO(p), inv = 1 - e;
+        // Flight intensity reshapes how cinematic the fly-out-of-DNA is
+        const fi = this.props.flightIntensity || 'Balanced';
+        const cfg = fi === 'Subtle'
+          ? { tz: -520, spin: 110, rx: 22, rz: 9, tx: 34, sc0: 0.4 }
+          : fi === 'Cinematic'
+          ? { tz: -1550, spin: 340, rx: 60, rz: 22, tx: 76, sc0: 0.05 }
+          : { tz: -1080, spin: 200, rx: 40, rz: 15, tx: 58, sc0: 0.13 };
+        const spin = inv * (cfg.spin + s * (y * 0.05));
+        const tx = s * cfg.tx * inv;      // pulled in toward the central spine
+        const tz = cfg.tz * inv;          // deep behind the DNA plane, flies forward
+        const rx = inv * cfg.rx;          // tumble
+        const rz = s * inv * cfg.rz;      // bank
+        const ty = inv * 44;
+        const scale = cfg.sc0 + (1 - cfg.sc0) * e;
+        el.style.opacity = Math.min(1, 0.1 + 1.2 * e).toFixed(3);
+        el.style.transform =
+          `translateX(${tx.toFixed(2)}%) translateY(${ty.toFixed(1)}px) translateZ(${tz.toFixed(0)}px) ` +
+          `rotateX(${rx.toFixed(1)}deg) rotateY(${spin.toFixed(1)}deg) rotateZ(${rz.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+      }
+    });
+  }
+
+  updateRail() {
+    const sections = document.querySelectorAll('[data-section]');
+    let active = null, best = -Infinity;
+    sections.forEach((s) => {
+      const t = s.getBoundingClientRect().top;
+      if (t <= 160 && t > best) { best = t; active = s.getAttribute('data-section'); }
+    });
+    if (!active && sections[0]) active = sections[0].getAttribute('data-section');
+    document.querySelectorAll('[data-rail]').forEach((d) => {
+      const on = d.getAttribute('data-rail') === active;
+      d.style.opacity = on ? '1' : '0.4';
+      const dot = d.querySelector('[data-dot]');
+      if (dot) { dot.style.background = on ? 'oklch(0.53 0.15 160)' : 'oklch(0.8 0.03 160)'; dot.style.transform = on ? 'scale(1.55)' : 'scale(1)'; }
+      const lab = d.querySelector('[data-label]');
+      if (lab) lab.style.color = on ? 'oklch(0.4 0.13 160)' : 'oklch(0.6 0.02 165)';
+    });
+  }
+
+  scrollToSection(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const yy = el.getBoundingClientRect().top + (window.scrollY || 0) - 24;
+    window.scrollTo({ top: yy, behavior: 'smooth' });
+  }
+
+  registerHelixOuter(el) { this.helixOuter = el; this.ensureLoop(); }
+  registerFloatLayer(el) { this.floatLayer = el; this.ensureLoop(); }
+  registerType(el) { this.typeEl = el; this.ensureLoop(); }
+
+  typeTick() {
+    if (!this.typeEl) return;
+    const now = performance.now();
+    const tw = this.tw;
+    const cur = this.commands[tw.cmd];
+    if (tw.mode === 'type') {
+      if (now - tw.last > 52) { tw.last = now; tw.len++; this.typeEl.textContent = cur.slice(0, tw.len); if (tw.len >= cur.length) { tw.mode = 'hold'; tw.holdUntil = now + 1600; } }
+    } else if (tw.mode === 'hold') {
+      if (now > tw.holdUntil) { tw.mode = 'del'; tw.last = now; }
+    } else {
+      if (now - tw.last > 22) { tw.last = now; tw.len--; this.typeEl.textContent = cur.slice(0, tw.len); if (tw.len <= 0) { tw.mode = 'type'; tw.cmd = (tw.cmd + 1) % this.commands.length; } }
+    }
+  }
+
+  buildHelixRungs() {
+    const palettes = {
+      Teal:   [['A','T','oklch(0.62 0.13 158)','oklch(0.66 0.10 190)'], ['G','C','oklch(0.58 0.12 178)','oklch(0.64 0.12 150)']],
+      Ocean:  [['A','T','oklch(0.60 0.13 240)','oklch(0.64 0.11 210)'], ['G','C','oklch(0.55 0.13 262)','oklch(0.62 0.12 224)']],
+      Aurora: [['A','T','oklch(0.63 0.15 300)','oklch(0.68 0.13 178)'], ['G','C','oklch(0.60 0.14 258)','oklch(0.66 0.14 150)']],
+      Mono:   [['A','T','oklch(0.52 0.02 200)','oklch(0.62 0.02 200)'], ['G','C','oklch(0.46 0.02 200)','oklch(0.58 0.02 200)']],
+    };
+    const pairs = palettes[this.props.dnaPalette] || palettes.Teal;
+    const pres = this.props.dnaPresence || 'Balanced';
+    const n = pres === 'Whisper' ? 30 : pres === 'Bold' ? 58 : 46;
+    const op = pres === 'Whisper' ? 0.5 : pres === 'Bold' ? 0.94 : 0.78;
+    const rungs = [];
+    for (let i = 0; i < n; i++) {
+      const pair = pairs[i % 2];
+      const flip = i % 4 < 2;
+      rungs.push({
+        id: i,
+        angle: i * (360 / n) * 1.7,
+        y: (i - (n - 1) / 2) * 32,
+        op,
+        leftLetter: flip ? pair[0] : pair[1],
+        rightLetter: flip ? pair[1] : pair[0],
+        leftColor: flip ? pair[2] : pair[3],
+        rightColor: flip ? pair[3] : pair[2],
+      });
+    }
+    return rungs;
+  }
+
+  buildFloaters() {
+    const hue = ({ Teal: 160, Ocean: 235, Aurora: 290, Mono: 200 })[this.props.dnaPalette] || 160;
+    const chroma = this.props.dnaPalette === 'Mono' ? 0.015 : 0.055;
+    const color = `oklch(0.82 ${chroma} ${hue})`;
+    const kinds = ['cow', 'sheep', 'human'];
+    // Hand-placed so nothing sits dead-centre behind the reading column
+    const spots = [
+      { left: 4,  top: 12, kind: 'cow',   size: 132 },
+      { left: 82, top: 8,  kind: 'sheep', size: 116 },
+      { left: 68, top: 22, kind: 'human', size: 58 },
+      { left: 12, top: 40, kind: 'sheep', size: 104 },
+      { left: 88, top: 38, kind: 'human', size: 64 },
+      { left: 3,  top: 66, kind: 'human', size: 60 },
+      { left: 84, top: 62, kind: 'cow',   size: 124 },
+      { left: 20, top: 82, kind: 'cow',   size: 116 },
+      { left: 70, top: 84, kind: 'sheep', size: 100 },
+      { left: 46, top: 5,  kind: 'human', size: 52 },
+      { left: 50, top: 92, kind: 'human', size: 56 },
+      { left: 92, top: 88, kind: 'sheep', size: 92 },
+    ];
+    return spots.map((s, i) => ({
+      id: i,
+      left: s.left,
+      top: s.top,
+      size: s.size,
+      color,
+      opacity: (s.kind === 'human' ? 0.22 : 0.26).toFixed(2),
+      anim: i % 2 ? 'drift-a' : 'drift-b',
+      dur: 7 + (i % 5),
+      delay: -(i % 6),
+      isCow: s.kind === 'cow',
+      isSheep: s.kind === 'sheep',
+      isHuman: s.kind === 'human',
+    }));
+  }
+
+  buildBlosumGrid() {
+    const cells = [];
+    let seed = 3;
+    const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+    const palette = ['oklch(0.9 0.03 160)', 'oklch(0.78 0.08 165)', 'oklch(0.65 0.13 160)', 'oklch(0.5 0.15 158)'];
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) {
+      cells.push({ x: c * 28 + 20, y: r * 22 + 10, color: palette[Math.floor(rand() * palette.length)] });
+    }
+    return cells;
+  }
+
+  renderVals() {
+    const navItems = [
+      { id: 'home', label: 'Home' },
+      { id: 'about', label: 'About' },
+      { id: 'skills', label: 'Skills' },
+      { id: 'projects', label: 'Projects' },
+      { id: 'publications', label: 'Publications' },
+      { id: 'experience', label: 'Experience' },
+      { id: 'contact', label: 'Contact' },
+    ];
+
+    const quickFacts = [
+      { label: 'Location', value: 'United Kingdom (open worldwide)' },
+      { label: 'Availability', value: '2026' },
+      { label: 'Currently', value: 'MSc dissertation' },
+      { label: 'Languages', value: 'English (fluent)' },
+    ];
+
+    const skillGroups = [
+      { name: 'Languages', tools: ['Python', 'R', 'Bash', 'SQL / MySQL'] },
+      { name: 'Compute & workflow', tools: ['Unix/Linux CLI', 'HPC / SLURM', 'Conda', 'Git/GitHub', 'Software testing', 'Pipeline dev'] },
+      { name: 'Sequencing & assembly', tools: ['ONT', 'Illumina', 'PacBio HiFi', 'Hifiasm', 'Phasing', 'NextPolish', 'BUSCO', 'Pangenome graphs'] },
+      { name: 'Genomics analysis', tools: ['STAR', 'featureCounts', 'DESeq2', 'fgsea', 'bwa-mem2', 'Minimap2', 'samtools', 'IGV', 'BLAST', 'MAFFT'] },
+      { name: 'Evolutionary / comparative', tools: ['IQ-TREE 2', 'ModelFinder', 'FigTree', 'OrthoFinder', 'DIAMOND', 'Phylo. profiling'] },
+      { name: 'Stats & visualization', tools: ['Statistical testing', 'Clustering', 'GO enrichment', 'ggplot2', 'pheatmap', 'Network viz'] },
+      { name: 'Data & databases', tools: ['Ensembl BioMart', 'STRING', 'GEO / E-utilities', 'Relational DBs', 'R Shiny'] },
+    ];
+
+    const featuredProject = { stack: ['ONT', 'Illumina', 'de novo assembly', 'Polishing', 'HPC'] };
+
+    const rawProjects = [
+      { title: 'What breaks in an Isl1-mutant embryo', summary: 'Took a published mouse dataset (healthy vs Isl1-mutant tissue) and asked what the mutation changes in gene expression. The real story was at the pathway level: hypoxia, EMT and angiogenesis lit up, fitting the placental blood-vessel defects reported for this gene. Ranked pathways on the directional statistic rather than raw p-values for a cleaner signal.', stack: ['STAR', 'featureCounts', 'DESeq2', 'fgsea', 'R'], thumb: 'bars' },
+      { title: 'Two questions about deep evolutionary history', summary: 'Where do horseshoe crabs sit in the arachnid tree? Tested with a mitochondrial and a nuclear marker under many models, and the instability itself was the result, showing how much a single-marker phylogeny hinges on the marker. Separately, used presence/absence of the key nitrogen-fixation gene across 10 cyanobacteria to predict others: 81% already had documented roles.', stack: ['MAFFT', 'IQ-TREE 2', 'OrthoFinder', 'DIAMOND'], thumb: 'tree' },
+      { title: 'Can one willow genome stand in for its relatives?', summary: 'Using Darwin Tree of Life data for a rare Scottish montane willow, ran two assembly approaches head to head, and one clearly won on completeness and contiguity. Cross-species reads then mapped almost as well (only ~5% drop), so one good reference can realistically serve a group of closely related willows.', stack: ['Hifiasm', 'Miniasm', 'bwa-mem2', 'IGV'], thumb: 'trace' },
+      { title: 'A sequence-alignment toolkit that doesn\u2019t fall over', summary: 'Turned an existing alignment codebase into a usable tool with one clean interface over BLAST, Smith-Waterman, statistics and testing. Much of the effort went into trust: a validation layer catching bad input, configurable scoring, and a 32-test suite. Careful reading turned up five genuine bugs, fixed and documented.', stack: ['Python', 'argparse', 'unittest'], thumb: 'grid', gridCells: this.buildBlosumGrid() },
+      { title: 'Pulling three databases into one answer', summary: 'For a set of mouse genes, built something that queries three major databases at once, works out functional similarity, and stores the combined result in a proper relational database. Went further with a design essay taking apart STRING\u2019s structure and proposing a cleaner schema with provenance tracking and a modern API layer.', stack: ['R', 'BioMart', 'STRING', 'MySQL'], thumb: 'nodegraph' },
+      { title: 'Spotting protein filaments in living cells', award: true, summary: 'In a hackathon my team built a tool that automatically detects short-lived protein filaments in microscopy footage of living yeast, which is tricky because the filaments flicker in and out of view. We wrapped it in a working website so others could run it on their own images. It won first prize.', stack: ['Python', 'Image analysis', 'Web app'], thumb: 'fil' },
+    ];
+    const otherProjects = rawProjects.map((p, i) => ({
+      ...p,
+      repo: 'https://github.com/bhavya-24',
+      side: i % 2 === 0 ? 'right' : 'left',
+      justify: i % 2 === 0 ? 'flex-end' : 'flex-start',
+    }));
+
+    const publications = [
+      { type: 'REVIEW', link: true, title: 'Combatting antibiotic resistance: challenges and emerging therapeutic strategies', venue: 'Future Microbiology (Taylor & Francis), 2026', href: 'https://www.tandfonline.com/doi/10.1080/17460913.2026.2627823' },
+      { type: 'CONFERENCE', title: 'Sustainable Milk Adulterant Testing in the Field', venue: 'Selected for IEEE CONNECT International Conference, Bangalore 2025' },
+      { type: 'ABSTRACT', title: 'LpxB enzyme in Acinetobacter baumannii: protein modelling, virtual screening, MD', venue: 'JMI International Conference 2025' },
+      { type: 'ABSTRACT', title: 'Three further conference abstracts', venue: '2022 – 2024' },
+    ].map((p) => ({ ...p, link: !!p.link, plain: !p.link, arrow: p.link ? ' ↗' : '' }));
+
+    const experience = [
+      { role: 'Protein Facility Lab, Sharda University', dates: 'Jun 2024', desc: 'Structural bioinformatics: homology modelling, docking, GROMACS MD; Python/R automation of virtual high-throughput screening.' },
+      { role: 'Chanakya UG Fellowship, IIT Roorkee', dates: 'Sep 2023 – Jun 2024', desc: 'Co-developed a milk-adulteration detection device (EEE Dept.); assays, microcontrollers, instrumentation.' },
+      { role: 'Research Intern, BioSetup & District Hospital (ASMC) Pilibhit', dates: '2022 – 2023', desc: 'Genomics/biostatistics, molecular docking; pathology-lab routines; BSL-2 (COVID-19) testing.' },
+    ];
+
+    const education = [
+      { role: 'MSc Bioinformatics, University of Edinburgh', dates: '2025 – 2026', desc: '1st Prize PRIMED Bio-hackathon; Digital Skills Specialist Edinburgh Award. Core: genome assembly, RNA-seq, comparative & evolutionary genomics, NGS, databases, R/stats.' },
+      { role: 'B.Tech, Sharda University', dates: '2021 – 2025', desc: 'CGPA 8.016. IIT Roorkee R&D (Chanakya UG) Fellowship. Certifications: Google, IIT Madras/Guwahati/Roorkee/Kharagpur.' },
+    ];
+
+    return {
+      navItems, quickFacts, skillGroups, featuredProject, otherProjects, publications, experience, education,
+      helixRungs: this.buildHelixRungs(),
+      floaters: this.buildFloaters(),
+      scrollToSection: this.scrollToSection.bind(this),
+      registerHelixOuter: this.registerHelixOuter.bind(this),
+      registerFloatLayer: this.registerFloatLayer.bind(this),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
